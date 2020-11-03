@@ -1,0 +1,152 @@
+{% load static %}
+
+{% include 'inc/head.inc.html' %}
+{% include 'inc/navbar.inc.html' %}
+
+<body>
+
+    <div class="container-fluid py-5">
+        <div class="card p-4" style="width: fit-content; margin: auto; box-shadow: 5px 5px 5px #cccccc;">
+            <input class="field form-control m-0" value="CM102326" id="project-number" type="text" placeholder="Project number">
+            <p class="text-danger p-0 m-0" id="error"></p>
+            <button type="button" class="btn btn-info btn-block mt-3" style="height:45px" onclick="search_now()">Search now</button>
+        </div>
+
+        <br>
+        <br>
+
+        <div class="card text-center p-3" id="whole-container" style="display: none;">
+            <div class="card py-2 bg-secondary text-white">
+                <h1 class="display-4" style="font-size: 30px;">Project Status Information</h1>
+            </div>
+
+            <!-- table of data -->
+            <div class="card mt-2" style="max-width: 100%; overflow-x: auto;">
+
+                <div class="card p-3 text-secondary" style="border-radius: 2px 2px 0px 0px;">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="card py-3" style="background-color: #fafafa; box-shadow: 5px 5px 5px #cccccc;">
+                                <h4>Date ordered : <b><span class="text-info" id="whole-date">2/2/2020</span></b></h4>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6">
+                            <div class="card py-3" style="background-color: #fafafa; box-shadow: 5px 5px 5px #cccccc;">
+                                <h4>Project no : <b><span class="text-info" id="whole-project"></span></b></h4>
+                            </div>
+                        </div>
+
+                        <!-- <div class="col-sm-4">
+                            <div class="card py-3" style="background-color: #fafafa; box-shadow: 5px 5px 5px #cccccc;">
+                                <h4>Delivery date : <b><u><span id="whole-delivery"></span></u></b></h4>
+                            </div>
+                        </div> -->
+                    </div>
+                </div>
+
+
+                <table class="table table-striped">
+                    <thead>
+                      <tr>
+                        <th style="width:150px; line-height: 60px;">Order Date</th>
+                        <th style="width:150px; line-height: 25px;">Production code</th>
+                        <th style="line-height: 60px;">Project #</th>
+                        <th style="line-height: 30px;">Lot-number</th>
+                        <th style="line-height: 30px;">Sequence in LIMS system</th>
+                        <th>Project Synthesis Process</th>
+                        <th style="line-height: 30px;">Synthesis started</th>
+                        <th style="line-height: 30px;">Synthesis finished</th>
+                        <th style="line-height: 30px;">Quality evaluation prior purification</th>
+                        <th style="line-height: 30px;">Purification started</th>
+                        <th style="line-height: 30px;">Purification finished</th>
+                        <th style="line-height: 30px;">QC finished</th>
+                        <th style="line-height: 30px;">Shipping-date</th>
+                        <th style="line-height: 30px;">Est-ship-date</th>
+
+                
+
+                        <!-- <th style="width:150px; line-height: 60px;">Shipping Date</th> -->
+
+                      </tr>
+                    </thead>
+                    <tbody id="data-body">
+                      
+                    </tbody>
+                </table>
+            </div>
+
+            
+
+        </div>
+    </div>
+  
+</body>
+
+<script>
+    function search_now() {
+        var project_number = $("#project-number").val();
+
+        if (project_number && project_number.length > 0) {
+            $("#error").text("");
+
+            console.log(project_number);
+            $.ajax({
+                url: "{% url 'getProject' %}",
+                type: "GET",
+                data: `project_number=${project_number}`,
+                success: (response) => {
+                    if (response.status) {
+                        $("#whole-container").css('display', '');
+                        var myData = response.data
+                        $("#whole-date").text(myData[1][0]);
+                        $("#whole-project").text(myData[1][2]);
+                        $("#whole-date").text(myData[1][0]);
+                        
+                        $("#data-body").children().remove();
+
+                        console.log(myData);
+                        for (let i = 1; i < myData.length; i++) {
+                            let single = myData[i];
+                        
+                            $("#data-body").append(`
+                            
+                                <tr>
+                                    <td>${single[0]}</td>
+                                    <td>${single[1]}</td>
+                                    <td>${single[2]}</td>
+                                    <td>${single[3]}</td>
+                                    <td><i class="material-icons ${single[4]}">${single[4]}</i></td>
+                                    <td><i class="material-icons ${single[5]}">${single[5]}</i></td>
+                                    <td><i class="material-icons ${single[6]}">${single[6]}</i></td>
+                                    <td><i class="material-icons ${single[7]}">${single[7]}</i></td>
+                                    <td><i class="material-icons ${single[8]}">${single[8]}</i></td>
+                                    <td><i class="material-icons ${single[9]}">${single[9]}</i></td>
+                                    <td><i class="material-icons ${single[10]}">${single[10]}</i></td>
+                                    <td><i class="material-icons ${single[11]}">${single[11]}</i></td>
+                                    <td>${single[12]}</td>
+                                    <td>${single[13]}</td>
+
+                                </tr>
+                            
+                            `);
+                            
+                        }
+
+                        // <td>8 jan, 2020</td> 
+
+
+                    }else{
+                        $("#error").text("Project doesn't exist!");
+                        $("#whole-container").css('display', 'none');
+                    }
+                }
+            })
+
+        }else{
+            $("#error").text("Please fill the required field!")
+        }
+    }
+</script>
+
+</html>
